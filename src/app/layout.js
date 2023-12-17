@@ -1,5 +1,8 @@
+
 import { Inter } from 'next/font/google'
 import './globals.css'
+import  PVD  from './store/provider'
+import Header from './inc/header'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -10,8 +13,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
+    <PVD >
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+    
+      <body className={inter.className}>
+      <Header/>
+        {children}
+        </body>
     </html>
+    </PVD>
   )
 }
