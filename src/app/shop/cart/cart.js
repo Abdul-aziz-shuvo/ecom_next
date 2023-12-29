@@ -37,7 +37,7 @@ export default function Cart({product}) {
             <p>{product.price}</p>
             {/* <ColorBtn colorSelect={colorSelect} colors={product.color}/> */}
             {inCart ? <CartSetting product={product}/> : 
-            <Link href={'/shop/details/2'}>
+            <Link href={'/shop/details/'+product.id}>
                 view
             </Link> 
             } 
