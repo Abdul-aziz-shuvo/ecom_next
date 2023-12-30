@@ -14,6 +14,7 @@ use App\Http\Custom\MyJsonResponse;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 
 class ProductsController extends Controller
 {
@@ -22,10 +23,27 @@ class ProductsController extends Controller
         return MyJsonResponse::success($products,true);
     }
     public function productDetails($id){
-        $product = Product::find($id);
+        $product = Product::where('id',$id)->with('attributes')->get();
+        $product = $product[0];
         $rating = $product->Ratings()->get();
-        dd($product->attributes()->get());
-        return MyJsonResponse::success(['product'=>$product,'ratings'=> $rating],true);
+        $attributesData = [];
+        foreach($product->attributes as $attribute){
+
+            $data = $attribute->value;
+
+            //checking if key is alreay set or not - if set then value push to same  key
+            if(isset($attributesData[$attribute->attribute()->first()->name])){
+
+                //here in first array sign [key][] we are assign the keyname and second array sign  [][value] declare for the value that we are trying to assign
+                $attributesData[$attribute->attribute()->first()->name][] = $data;
+            }else{
+
+                //otherwise push to in a new key
+                $attributesData[$attribute->attribute()->first()->name][] = $data;
+            }  
+        }
+       
+        return MyJsonResponse::success(['product'=>$product,'attibutesData'=> (array) $attributesData, 'ratings'=> $rating],true);
 
     }
     public function createProduct(Request $request){
@@ -34,9 +52,7 @@ class ProductsController extends Controller
             $data = $request->except(['image','attribute_value_id']); //remove property those not belong to product table
             $product = Product::create($data); // storing product data to database            
             $attribute_id = explode(',', $request->attribute_value_id) ; //string to array - attribute multiple id
-            // dd($product->attributes()->get());
-                $product->attributes()->attach($attribute_id); //inserting array of attribute id to pivot table
-            
+            $product->attributes()->attach($attribute_id); //inserting array of attribute id to pivot table
             return MyJsonResponse::success($product);
        }catch(Exception $excep){
             return MyJsonResponse::Error($excep);
